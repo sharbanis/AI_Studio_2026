@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="SalesforceLoginSuite" parallel="false">
+    <test name="SalesforceLoginTests">
+        <classes>
+            <class name="com.aitester.salesforce.tests.ValidLoginTest"/>
+            <class name="com.aitester.salesforce.tests.InvalidLoginTest"/>
+        </classes>
+    </test>
+</suite>
