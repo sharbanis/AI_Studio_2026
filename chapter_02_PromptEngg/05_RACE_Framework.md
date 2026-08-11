@@ -1,15 +1,11 @@
-/*
-
 **Task** - Bug Report for the invalid login at the app.vwo.com using RACE framework
  R — Role
  A — Action
  C — Context
  E — Expectation
 
-R — Role A — Action C — Context E — Expectation
-*/
  **Prompt**
- /*
+
  Create a Bug Report for the invalid login at the app.vwo.com
  R — Role - As a 15-year QA automation engineer with functional testing experience. 
  A — Action - So create a bug report in std Jira format properly with the proper context covering mandatory details .  And make sure steps, expected result, actual result and everything is basically mentioned properly in the Jira ticket or bug report that you are creating. 

@@ -1,5 +1,5 @@
 ## RTCFR AND RICE POT. 
-## Template 6: Regression Test Suite
+## Template 06 : Regression Test Suite
 
 ROLE: You are a QA Lead planning regression testing.
 

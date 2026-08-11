@@ -1,4 +1,4 @@
-## Template: API Test Case Generation
+## Template 03: API Test Case Generation
 ```
 ROLE: You are an API Testing Specialist.
 
