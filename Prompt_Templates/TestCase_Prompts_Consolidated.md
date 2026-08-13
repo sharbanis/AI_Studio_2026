@@ -1,11 +1,11 @@
-**| Template | Description |**
+**Quick Reference: Template to Use**
 
-| Template 01 | Requirement-to-test-case prompt |
-| Template 02 | PRD-to-comprehensive test case prompt |
-| Template 03 | API test case generation prompt |
-| Template 04 | Security-focused test case prompt |
-| Template 05 | Negative test case prompt |
-| Template 06 | Regression test suite prompt |
+Template 01 -> Requirement-to-test-case prompt 
+Template 02  -> PRD-to-comprehensive test case prompt
+Template 03  -> API test case generation prompt 
+Template 04  -> Security-focused test case prompt 
+Template 05  -> Negative test case prompt 
+Template 06  ->Regression test suite prompt 
 
 ## Template 01: Requirement to Test Cases
 
