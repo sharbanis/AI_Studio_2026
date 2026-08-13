@@ -1,3 +1,5 @@
+# Product Requirement Document (PRD) – VWO Login Page
+
 | Req ID | Requirement | Priority |
 |---|---|---|
 | REQ-01 | Standard User Authentication The login page shall allow an authorized VWO user to authenticate using a registered email address and password. The system shall validate mandatory fields, reject invalid credentials without revealing whether the account exists, display clear actionable validation messages, and prevent submission until required inputs are provided. Password input shall be masked and the page shall support keyboard-accessible form submission. | P0 – Critical |
