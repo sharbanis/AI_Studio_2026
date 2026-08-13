@@ -1,4 +1,4 @@
-## VWO Login Module PRD Prompt
+# VWO Login Module PRD Generation Prompt
 
 **Role:** Senior Business Analyst  
 **Task:** Create a concise, industry-standard PRD snippet for the login page at [https://app.vwo.com/#/login](https://app.vwo.com/#/login).
