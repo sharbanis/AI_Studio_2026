@@ -19,4 +19,4 @@ Role: Act as an expert Senior Business Analyst with extensive experience in SaaS
 
 | Req id | Req Description | Details | Priority |
 |---|---|---|---|
-generate a PDF doc for the same that I can download for use
+
