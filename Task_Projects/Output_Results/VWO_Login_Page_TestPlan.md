@@ -304,4 +304,6 @@ Note: Specific dates are not provided in the requirement context; therefore, sch
 
 The Login module will be considered acceptable for release only when it demonstrates compliance with the explicit functional, security, and session validation requirements and no critical gaps remain against the planned login coverage criteria.
 
+---
+
 > Final note: This plan intentionally avoids assumptions about architecture, backend implementation, specific tools, or environmental configuration because those details were not provided in the requirement context. The project must therefore validate the login module against only the documented requirements and explicitly fill any missing technical facts with "Information not provided in requirement".
