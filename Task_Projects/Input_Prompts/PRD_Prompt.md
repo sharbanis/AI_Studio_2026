@@ -1,5 +1,3 @@
-VWO Login Module PRD Prompt
-
 ## VWO Login Module PRD Prompt
 
 **Role:** Senior Business Analyst  
