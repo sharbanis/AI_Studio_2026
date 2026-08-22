@@ -1,1 +1,4 @@
 - Prefers DeepSeek models (e.g., deepseek-v4-pro) over Qwen. Confidence: 0.8
+- Prefers apps to offer a selectable choice of LLM provider (e.g., Ollama vs Groq) rather than a hardcoded one. Confidence: 0.7
+- Prefers graceful fallback so an app works as long as at least one provider/credential is available. Confidence: 0.7
+- Keeps plan.md updated to reflect code changes. Confidence: 0.7

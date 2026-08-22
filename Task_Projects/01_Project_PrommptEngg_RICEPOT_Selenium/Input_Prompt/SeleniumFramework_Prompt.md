@@ -1,59 +1,6 @@
 # Understanding the RICE POT Prompt - Plan
 
-Here's what I extract from this prompt before I build the plan:
 
-**The RICE POT template** is a structured prompting framework for generating enterprise-grade code with zero ambiguity. This specific instance asks for a **Salesforce login page automation framework** using:
-
-| Layer | What it Demands |
-|---|---|
-| **Role** | QA architect with 15yr CRM/Salesforce domain expertise |
-| **Instructions** | Enterprise Selenium + Java + Maven + TestNG framework; valid + invalid login tests |
-| **Context** | `login.salesforce.com/?locale=in` — email, password, submit, "remember me" |
-| **Example** | PageFactory with `@FindBy`, xpath-only selectors, `doLogin()` action method |
-| **Parameters** | External URLs + credentials provided separately; production-grade precision |
-| **Output** | Exactly 3 files: 1 Page Object, 2 TestNG scripts, Maven `pom.xml` |
-| **Tone** | Technical, precise, no comments, no `Thread.sleep`, no CSS/ID/name selectors |
-
-The key constraints: **xpath-only**, **no CSS/ID/name**, **no comments**, **no Thread.sleep**, **PageFactory + @FindBy**, **TestNG annotations**, **robust exception handling**.
-
----
-
-Now let me explore the existing project to understand what's already scaffolded, then build the plan.
-
-Read [](file:///Users/promode/Documents/AITesterBlueprin4x/chapter_02_Prompt_Eng/02_RICE_POT.example.md)
-
-Read [](file:///Users/promode/Documents/AITesterBlueprin4x/chapter_02_Prompt_Eng/01_RICE_POT_Template.md)
-
-Read [](file:///Users/promode/Documents/AITesterBlueprin4x/chapter_02_Prompt_Eng/00_Task1.md)
-
-Read [](file:///Users/promode/Documents/AITesterBlueprin4x/README.md)
-
-Good. Now let me check the chapter_01 folder for any additional context about project conventions.
-
-Read [](file:///Users/promode/Documents/AITesterBlueprin4x/chapter_01_LLM_BASICS)
-
-Now I have the full picture. Before I finalize the plan, I need to clarify a few things.
-
-Analyzing your answers...
-
-Got it. Let me now fetch the live Salesforce login page to extract real xpaths before building the plan.
-
-
-
-Fetched https://login.salesforce.com/?locale=in
-
-Now I have all the context I need. Let me build the comprehensive plan.
-
-Created memory file [](file:///Users/promode/Library/Application%20Support/Code/User/workspaceStorage/d4b8876e02373f67587248f5c4564d1c/GitHub.copilot-chat/memory-tool/memories/N2M1OTQ0OGQtOGE4Zi00MTRjLWJlY2ItNGYzM2NlMmVlNDM5/plan.md)
-
----
-
-## What I Understand From This RICE POT Prompt
-
-This is a **structured code-generation prompt** using the RICE POT framework. Here's the decoded intent:
-
-| Component | What It's Asking For |
-|---|---|
 | **R**ole | Senior QA architect persona (15yr, CRM/Salesforce domain) — this biases output toward production patterns |
 | **I**nstructions | Enterprise Selenium + Java + Maven + TestNG framework; valid + invalid login tests; TestNG annotations; exception handling; PageFactory + `@FindBy`; xpath **only** |
 | **C**ontext | Target: `login.salesforce.com/?locale=in` (Indian locale, may serve different HTML). Login has username, password, submit, remember-me |
