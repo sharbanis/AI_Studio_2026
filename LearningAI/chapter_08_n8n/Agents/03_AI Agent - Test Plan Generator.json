@@ -1,0 +1,154 @@
+{
+  "name": "AI Agent - Test Plan Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5f43ad84-9c6b-465f-9506-e3deefd5e72f",
+      "name": "When chat message received",
+      "webhookId": "e28923d7-f6b5-4d0f-b4f0-08c4aae839dd"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Create  test plan from the jira id provided by user. Cover details as below:\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "0639d6e6-e460-49c7-9c78-155216c8a9ed",
+      "name": "Test Plan Generator"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "7f5a7a48-e442-45e9-b1dc-ab15d9dcf642",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "qXUSSnqJd9K5YARN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        192
+      ],
+      "id": "facb08a5-f066-4c4e-8cb2-607b5e2e5910",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "simplifyOutput": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        192
+      ],
+      "id": "5a3d9736-b096-4cdb-98de-93fabd1b534c",
+      "name": "Test Plan",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "DNq4kNGBMMsRMNaB",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Test Plan Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Test Plan Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Test Plan Generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Plan": {
+      "ai_tool": [
+        [
+          {
+            "node": "Test Plan Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Plan Generator": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0a64036a-2057-42a9-9370-cc49a93562cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e6175cb2f322ce0df82cc6f41ccca14f91ae4947553f482b4bfdb7345ad6349"
+  },
+  "nodeGroups": [],
+  "id": "fulIvlQsnj4WcZsk",
+  "tags": []
+}

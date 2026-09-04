@@ -2,3 +2,6 @@
 - Prefers apps to offer a selectable choice of LLM provider (e.g., Ollama vs Groq) rather than a hardcoded one. Confidence: 0.7
 - Prefers graceful fallback so an app works as long as at least one provider/credential is available. Confidence: 0.7
 - Keeps plan.md updated to reflect code changes. Confidence: 0.7
+- Prefers documentation/summaries to be concise and high-level rather than exhaustive. Confidence: 0.7
+- Prefers including a visual flow diagram to explain architecture for lay readers. Confidence: 0.7
+- Prefers explanations written for a layman/non-technical audience. Confidence: 0.7

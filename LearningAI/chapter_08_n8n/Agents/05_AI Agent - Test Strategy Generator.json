@@ -1,0 +1,154 @@
+{
+  "name": "05_AI Agent - Test Strategy Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "421c412c-06c9-4356-9582-e9bd49e74182",
+      "name": "When chat message received",
+      "webhookId": "a7f24178-86e4-460b-be17-6b60eb53c404"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "405ddd10-5aa3-4212-a91c-e03b32b0e1b2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "qXUSSnqJd9K5YARN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        192
+      ],
+      "id": "e2fb3c67-bfcf-428d-81ef-4e8768bd18f2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Create  test startegy from the jira id provided by user. \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "79e232d0-f6e0-40a4-af5d-70e27b014e23",
+      "name": "Test Strategy Generator"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "simplifyOutput": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        192
+      ],
+      "id": "18179467-0154-4dd9-8e30-2590fbb3990e",
+      "name": "Test Strategy",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "DNq4kNGBMMsRMNaB",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Test Strategy Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Test Strategy Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Test Strategy Generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Strategy Generator": {
+      "main": [
+        []
+      ]
+    },
+    "Test Strategy": {
+      "ai_tool": [
+        [
+          {
+            "node": "Test Strategy Generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e36e1c9c-9be4-427e-bc6d-91a57165788e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e6175cb2f322ce0df82cc6f41ccca14f91ae4947553f482b4bfdb7345ad6349"
+  },
+  "nodeGroups": [],
+  "id": "GXNH4xEGyAGVOLe6",
+  "tags": []
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Test Plan Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Jira Test Plan Generator</h1>
+            <p class="subtitle">Generate professional test plans from Jira issues using AI</p>
+        </div>
+
+        <div class="content">
+            <!-- Input Section -->
+            <div class="section input-section">
+                <h2>Step 1: Enter Jira Issue</h2>
+                <form id="generatorForm">
+                    <div class="form-group">
+                        <label for="issueKey">Jira Issue ID</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="issueKey" placeholder="e.g., PROJ-123" maxlength="20"
+                                autocomplete="off" />
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Generate Test Plan</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+                        </div>
+                        <p class="help-text">Enter your Jira issue ID to generate comprehensive test cases</p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Section -->
+            <div id="loadingSection" class="section loading-section" style="display:none;">
+                <div class="spinner"></div>
+                <h3>Generating test plan...</h3>
+                <div class="progress-steps">
+                    <div class="step">
+                        <span class="step-icon">1</span>
+                        <span class="step-text">Fetching issue</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-icon">2</span>
+                        <span class="step-text">Normalizing data</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-icon">3</span>
+                        <span class="step-text">Generating test cases</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-icon">4</span>
+                        <span class="step-text">Validating output</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Section -->
+            <div id="errorSection" class="section error-section" style="display:none;">
+                <div class="error-icon">⚠️</div>
+                <h3>Error</h3>
+                <p id="errorMessage"></p>
+                <button class="btn btn-secondary" onclick="resetForm()">Try Again</button>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="section results-section" style="display:none;">
+                <div class="results-header">
+                    <h2>Step 2: Test Plan Results</h2>
+                    <div class="result-status success">✅ Generated Successfully</div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="metadata-box">
+                    <div class="metadata-row">
+                        <span class="metadata-label">Issue:</span>
+                        <span id="resultIssueKey" class="metadata-value"></span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">Title:</span>
+                        <span id="resultTitle" class="metadata-value"></span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">Type:</span>
+                        <span id="resultType" class="metadata-value"></span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">Priority:</span>
+                        <span id="resultPriority" class="metadata-value"></span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">Generated:</span>
+                        <span id="resultGenerated" class="metadata-value"></span>
+                    </div>
+                </div>
+
+                <!-- Objective -->
+                <div class="test-plan-section">
+                    <h3>📌 Objective</h3>
+                    <p id="resultObjective"></p>
+                </div>
+
+                <!-- Coverage -->
+                <div class="coverage-box">
+                    <h3>📊 Coverage Analysis</h3>
+                    <div class="coverage-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Total Criteria:</span>
+                            <span class="metric-value" id="coverageTotalCriteria">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Covered:</span>
+                            <span class="metric-value" id="coverageCovered">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Coverage %:</span>
+                            <span class="metric-value" id="coveragePercent">0%</span>
+                        </div>
+                    </div>
+                    <div class="coverage-bar">
+                        <div id="coverageBar" class="coverage-filled"></div>
+                    </div>
+                </div>
+
+                <!-- Test Cases Summary -->
+                <div class="test-plan-section">
+                    <h3>🧪 Test Cases Summary</h3>
+                    <div class="test-categories">
+                        <div class="category-summary">
+                            <span class="category-name">Happy Path</span>
+                            <span class="category-count" id="countHappyPath">0</span>
+                        </div>
+                        <div class="category-summary">
+                            <span class="category-name">Negative</span>
+                            <span class="category-count" id="countNegative">0</span>
+                        </div>
+                        <div class="category-summary">
+                            <span class="category-name">Edge Cases</span>
+                            <span class="category-count" id="countEdgeCases">0</span>
+                        </div>
+                        <div class="category-summary">
+                            <span class="category-name">Regression</span>
+                            <span class="category-count" id="countRegression">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Priority Distribution -->
+                <div class="test-plan-section">
+                    <h3>🎯 Priority Distribution</h3>
+                    <div class="priority-breakdown">
+                        <div class="priority-item high">
+                            <span>High</span>
+                            <span id="priorityHigh">0</span>
+                        </div>
+                        <div class="priority-item medium">
+                            <span>Medium</span>
+                            <span id="priorityMedium">0</span>
+                        </div>
+                        <div class="priority-item low">
+                            <span>Low</span>
+                            <span id="priorityLow">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quality Flags -->
+                <div id="qualityFlagsSection" class="test-plan-section" style="display:none;">
+                    <h3>⚠️ Data Quality Flags</h3>
+                    <div id="qualityFlagsList" class="flags-list"></div>
+                </div>
+
+                <!-- Download & Actions -->
+                <div class="actions-box">
+                    <h3>📥 Download Results</h3>
+                    <div class="button-group">
+                        <button class="btn btn-download" id="downloadMarkdown">
+                            <span>📄</span> Download Markdown
+                        </button>
+                        <button class="btn btn-download" id="downloadJSON">
+                            <span>📋</span> Download JSON
+                        </button>
+                        <button class="btn btn-copy" id="copyJSON">
+                            <span>📋</span> Copy JSON to Clipboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- JSON Preview -->
+                <div class="json-preview-section">
+                    <h3>📊 JSON Preview</h3>
+                    <pre id="jsonPreview"></pre>
+                </div>
+
+                <!-- New Test Plan Button -->
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="resetForm()">Generate Another Test Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <strong>Powered by:</strong> Groq LLM (qwen/qwen3.8-27b) |
+                <strong>Data Source:</strong> Jira REST API |
+                <strong>Framework:</strong> Flask + Python
+            </p>
+        </div>
+    </div>
+
+    <!-- Load JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "project": "KAN",
+    "issueKey": "KAN-2",
+    "issueTitle": "Login Page - Req",
+    "issueType": "Unknown",
+    "priority": "Medium",
+    "status": "To Do",
+    "generatedAt": "2026-09-02T12:29:28.083132Z",
+    "llmProvider": "groq",
+    "llmModel": "qwen/qwen3.8-27b",
+    "validationStatus": "PASSED"
+  },
+  "testPlan": {
+    "objective": "Verify login page - req",
+    "scope": [
+      "Core functionality",
+      "User interface",
+      "Integration"
+    ],
+    "preconditions": [
+      "User account exists"
+    ],
+    "testCases": []
+  },
+  "coverage": {
+    "totalCriteria": 1,
+    "coveredCriteria": 0,
+    "coveragePercent": 0.0,
+    "missingCoverage": [
+      "and"
+    ]
+  },
+  "priorityDistribution": {
+    "distribution": {
+      "High": 0,
+      "Medium": 0,
+      "Low": 0
+    },
+    "percentageByPriority": {},
+    "warnings": [
+      "No test cases generated"
+    ]
+  },
+  "dataQualityFlags": [],
+  "validationWarnings": []
+}

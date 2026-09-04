@@ -1,0 +1,21 @@
+# Phase 2: Link - Connectivity Testing Requirements
+
+# Core dependencies
+python-dotenv>=0.19.0
+requests>=2.28.0
+
+# LLM Integration
+groq>=0.4.0
+
+# Optional dependencies
+flask>=2.3.0  # For Phase 4 web UI
+flask-cors>=3.0.0
+
+# Optional: Alternative LLM support
+# ollama>=0.0.1  # Uncomment for Ollama fallback
+
+# Development/Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
