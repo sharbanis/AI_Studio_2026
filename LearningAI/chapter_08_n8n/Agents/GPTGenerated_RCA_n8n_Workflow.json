@@ -1,0 +1,569 @@
+{
+  "name": "Jira Production Bug - Automated RCA to Excel",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jira-production-bug-rca",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "01",
+      "name": "01_Jira_Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "Configure Jira webhook to call this endpoint for issue created/updated/comment events."
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst issue = body.issue ?? {};\nconst fields = issue.fields ?? {};\n\nconst labels = fields.labels ?? [];\nconst environment = typeof fields.environment === 'string'\n  ? fields.environment\n  : JSON.stringify(fields.environment ?? '');\n\nconst isProductionBug =\n  (fields.issuetype?.name ?? '').toLowerCase() === 'bug' &&\n  (\n    environment.toLowerCase().includes('production') ||\n    labels.some(l => String(l).toLowerCase() === 'production')\n  );\n\nreturn [{\n  json: {\n    isProductionBug,\n    issueKey: issue.key ?? '',\n    issueId: issue.id ?? '',\n    summary: fields.summary ?? '',\n    projectKey: fields.project?.key ?? '',\n    issueType: fields.issuetype?.name ?? '',\n    environment,\n    labels,\n    priority: fields.priority?.name ?? '',\n    severity: fields.severity?.name ?? fields.customfield_severity ?? '',\n    status: fields.status?.name ?? '',\n    reporter: fields.reporter?.displayName ?? '',\n    assignee: fields.assignee?.displayName ?? '',\n    created: fields.created ?? '',\n    updated: fields.updated ?? '',\n    rawIssue: issue\n  }\n}];"
+      },
+      "id": "02",
+      "name": "02_Validate_Production_Bug",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "Validates that the webhook event represents a Jira Bug associated with Production."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "production-bug",
+              "leftValue": "={{ $json.isProductionBug }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "03",
+      "name": "03_Is_Production_Bug",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        0
+      ],
+      "notes": "Stops non-production/non-bug events."
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    ...$json,\n    config: {\n      jiraBaseUrl: 'https://YOUR-DOMAIN.atlassian.net',\n      jiraProjectKey: 'YOUR_PROJECT',\n      productionLabel: 'production',\n      excelFileName: 'Production_RCA_Sample.xlsx',\n      rcaRegisterSheet: 'RCA Register',\n      aiModel: 'YOUR_AI_MODEL',\n      missingValue: 'Not Available in Jira - Investigation Required',\n      investigationRequired: 'Investigation Required'\n    }\n  }\n}];"
+      },
+      "id": "04",
+      "name": "04_Load_Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -120
+      ],
+      "notes": "Replace placeholders with environment variables or n8n variables. Do not hard-code secrets."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.config.jiraBaseUrl + '/rest/api/3/issue/' + $json.issueKey }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "expand",
+              "value": "names,schema,transitions,changelog,renderedFields"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        }
+      },
+      "id": "05",
+      "name": "05_Get_Jira_Issue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        -120
+      ],
+      "notes": "Add Jira authentication credential to this node."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('04_Load_Configuration').item.json.config.jiraBaseUrl + '/rest/api/3/issue/' + $('04_Load_Configuration').item.json.issueKey + '/comment' }}",
+        "options": {
+          "response": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        }
+      },
+      "id": "06",
+      "name": "06_Get_Jira_Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        -120
+      ],
+      "notes": "Add Jira authentication credential."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('04_Load_Configuration').item.json.config.jiraBaseUrl + '/rest/api/3/issue/' + $('04_Load_Configuration').item.json.issueKey + '?expand=changelog' }}",
+        "options": {
+          "response": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        }
+      },
+      "id": "07",
+      "name": "07_Get_Jira_History",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        -120
+      ],
+      "notes": "Use changelog to build an incident timeline. Add Jira authentication credential."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('04_Load_Configuration').item.json;\nconst issue = $('05_Get_Jira_Issue').item.json;\nconst comments = $('06_Get_Jira_Comments').item.json;\nconst history = $('07_Get_Jira_History').item.json;\n\nfunction adfToText(value) {\n  if (!value) return '';\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value)) return value.map(adfToText).join(' ');\n  if (typeof value === 'object') {\n    if (value.text) return value.text;\n    return Object.values(value).map(adfToText).join(' ');\n  }\n  return String(value);\n}\n\nconst f = issue.fields ?? {};\nconst commentList = (comments.comments ?? []).map(c => adfToText(c.body)).filter(Boolean);\n\nreturn [{\n  json: {\n    jira: {\n      issueKey: issue.key ?? base.issueKey,\n      issueId: issue.id ?? base.issueId,\n      summary: f.summary ?? base.summary,\n      description: adfToText(f.description),\n      issueType: f.issuetype?.name ?? base.issueType,\n      status: f.status?.name ?? base.status,\n      priority: f.priority?.name ?? base.priority,\n      severity: f.severity?.name ?? f.customfield_severity ?? base.severity,\n      reporter: f.reporter?.displayName ?? base.reporter,\n      assignee: f.assignee?.displayName ?? base.assignee,\n      created: f.created ?? base.created,\n      updated: f.updated ?? base.updated,\n      resolved: f.resolutiondate ?? '',\n      project: f.project?.key ?? base.projectKey,\n      components: (f.components ?? []).map(x => x.name),\n      labels: f.labels ?? base.labels,\n      fixVersions: (f.fixVersions ?? []).map(x => x.name),\n      affectedVersions: (f.versions ?? []).map(x => x.name),\n      environment: adfToText(f.environment) || base.environment,\n      comments: commentList,\n      changelog: history.changelog ?? []\n    },\n    config: base.config\n  }\n}];"
+      },
+      "id": "08",
+      "name": "08_Normalize_Jira_Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        -120
+      ],
+      "notes": "Normalizes Jira data and converts rich-text descriptions/comments to text."
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\nconst blockedKeys = [\n  'password', 'passwd', 'pwd', 'authorization',\n  'access_token', 'refresh_token', 'client_secret',\n  'api_token', 'secret'\n];\n\nfunction redact(value) {\n  if (typeof value !== 'string') return value;\n  let output = value;\n  for (const key of blockedKeys) {\n    const re = new RegExp(`(${key}\\\\s*[:=]\\\\s*)[^\\\\s,;]+`, 'ig');\n    output = output.replace(re, '$1[REDACTED]');\n  }\n  return output;\n}\n\nconst sanitized = JSON.parse(JSON.stringify(data));\nsanitized.jira.description = redact(sanitized.jira.description);\nsanitized.jira.comments = sanitized.jira.comments.map(redact);\n\nreturn [{ json: sanitized }];"
+      },
+      "id": "09",
+      "name": "09_Remove_Sensitive_Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        -120
+      ],
+      "notes": "Masks common secrets before AI processing. Extend patterns for your environment."
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json.jira;\nconst missing = $json.config.missingValue;\nconst investigate = $json.config.investigationRequired;\n\nconst text = [\n  `Jira Key: ${j.issueKey}`,\n  `Summary: ${j.summary}`,\n  `Description: ${j.description || missing}`,\n  `Issue Type: ${j.issueType}`,\n  `Status: ${j.status}`,\n  `Priority: ${j.priority || missing}`,\n  `Severity: ${j.severity || missing}`,\n  `Environment: ${j.environment || missing}`,\n  `Reporter: ${j.reporter || missing}`,\n  `Assignee: ${j.assignee || missing}`,\n  `Created: ${j.created || missing}`,\n  `Updated: ${j.updated || missing}`,\n  `Comments: ${j.comments.join('\\n---\\n') || missing}`\n].join('\\n');\n\nconst prompt = `You are a QA RCA Analyst. Analyze ONLY the Jira evidence below.\n\nRules:\n1. Never invent a root cause.\n2. HTTP 500 alone is not proof of a database, configuration, authentication, infrastructure, or code failure.\n3. Use \"Not Available in Jira - Investigation Required\" for missing information.\n4. Use \"Investigation Required\" for unsupported root cause, 5-Why, QA escape, corrective action, preventive action, or validation conclusions.\n5. Do not mark testing PASS unless Jira contains evidence that the test was executed and passed.\n6. Preserve exact HTTP status codes and error messages.\n7. Separate confirmed facts from assumptions.\n8. Return valid JSON only.\n\nRequired JSON:\n{\n  \"document_control\": {},\n  \"incident_summary\": {},\n  \"business_impact\": {},\n  \"incident_timeline\": [],\n  \"defect_details\": {},\n  \"technical_investigation\": [],\n  \"root_cause\": {},\n  \"five_why\": [],\n  \"qa_escape_analysis\": {},\n  \"corrective_actions\": [],\n  \"preventive_actions\": [],\n  \"regression_validation\": [],\n  \"risk_assessment\": [],\n  \"lessons_learned\": {},\n  \"final_summary\": {},\n  \"sign_off\": []\n}\n\nJIRA EVIDENCE:\n${text}`;\n\nreturn [{\n  json: {\n    ...$json,\n    aiPrompt: prompt\n  }\n}];"
+      },
+      "id": "10",
+      "name": "10_Prepare_AI_RCA_Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -120
+      ],
+      "notes": "This node prepares the AI prompt. Connect an n8n AI/LLM node here."
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nEXPECTED AI OUTPUT:\nThe next AI node should return the JSON described in 10_Prepare_AI_RCA_Prompt.\n\nThis placeholder Code node validates the expected structure after you connect\nyour preferred n8n AI model.\n\nReplace the source below with the actual AI node output.\n*/\nconst raw = $json.aiOutput ?? $json;\nlet rca = raw;\n\nif (typeof raw === 'string') {\n  const cleaned = raw.replace(/^```json\\s*/i, '').replace(/\\s*```$/i, '').trim();\n  rca = JSON.parse(cleaned);\n}\n\nif (!rca.document_control || !rca.incident_summary || !rca.root_cause) {\n  throw new Error('Invalid RCA JSON: required sections are missing.');\n}\n\nreturn [{ json: { ...$json, rca } }];"
+      },
+      "id": "11",
+      "name": "11_Validate_AI_JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        -120
+      ],
+      "notes": "Connect your AI node before this validation node."
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $json;\nconst r = d.rca;\nconst investigate = d.config.investigationRequired;\nconst missing = d.config.missingValue;\n\nfunction safe(v, fallback = missing) {\n  return v === undefined || v === null || v === '' ? fallback : v;\n}\n\nr.root_cause = r.root_cause || {};\nr.root_cause.technical_root_cause =\n  safe(r.root_cause.technical_root_cause, 'Not Determined - Investigation Required');\n\nif (r.root_cause.technical_root_cause !== 'Not Determined - Investigation Required') {\n  r.root_cause.root_cause_statement = safe(r.root_cause.root_cause_statement, investigate);\n}\n\nr.qa_escape_analysis = r.qa_escape_analysis || {};\nr.qa_escape_analysis.escape_point =\n  safe(r.qa_escape_analysis.escape_point, investigate);\n\nr.document_control = r.document_control || {};\nr.document_control.rca_id =\n  r.document_control.rca_id || `RCA-${d.jira.issueKey}`;\nr.document_control.defect_id =\n  r.document_control.defect_id || d.jira.issueKey;\n\nreturn [{ json: { ...d, rca: r } }];"
+      },
+      "id": "12",
+      "name": "12_Apply_RCA_Business_Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        -120
+      ],
+      "notes": "Prevents unsupported conclusions from becoming confirmed RCA findings."
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nExcel integration placeholder.\n\nRecommended implementation:\n- Use Microsoft Excel 365 node if the workbook is in OneDrive/SharePoint.\n- Or use Google Sheets if you choose to store RCA data in Sheets.\n- Or use a Code/Spreadsheet File approach if the workbook is local.\n\nLookup key:\nJira Issue Key = {{$json.jira.issueKey}}\n\nIf found: update existing RCA.\nIf not found: create new RCA.\n\nRecommended target sheet: RCA Register.\n*/\nreturn [{\n  json: {\n    ...$json,\n    excelLookupKey: $json.jira.issueKey,\n    excelAction: 'CREATE_OR_UPDATE'\n  }\n}];"
+      },
+      "id": "13",
+      "name": "13_Search_Excel_RCA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        -120
+      ],
+      "notes": "Replace with your Excel 365/OneDrive/SharePoint lookup node."
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nReplace this placeholder with the actual Excel lookup result.\n\nExpected:\nexistingRca = true/false\nexcelRowId = row identifier when updating\n*/\nreturn [{\n  json: {\n    ...$json,\n    existingRca: Boolean($json.existingRca),\n    excelRowId: $json.excelRowId ?? null\n  }\n}];"
+      },
+      "id": "14",
+      "name": "14_Check_Existing_RCA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        -120
+      ],
+      "notes": "Routes CREATE versus UPDATE based on Jira Issue Key."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "existing",
+              "leftValue": "={{ $json.existingRca }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "15",
+      "name": "15_Existing_RCA",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3360,
+        -120
+      ],
+      "notes": "TRUE = update existing RCA; FALSE = create new RCA."
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nEXCEL UPDATE PLACEHOLDER\n\nMap $json.rca into the existing RCA row identified by $json.excelRowId.\n\nUse:\n- Jira Issue Key as unique key\n- Preserve Created Date\n- Update Last Updated\n- Update RCA fields from latest evidence\n- Do not overwrite confirmed historical information unnecessarily\n*/\nreturn [{\n  json: {\n    ...$json,\n    action: 'UPDATE_RCA',\n    excelStatus: 'PENDING_EXCEL_NODE_CONFIGURATION',\n    lastUpdated: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "16",
+      "name": "16_Update_RCA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        -240
+      ],
+      "notes": "Replace with Excel 365/OneDrive/SharePoint Update Row node."
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nEXCEL CREATE PLACEHOLDER\n\nCreate a new row in RCA Register.\n\nPrimary key:\nJira Issue Key\n\nMap all required RCA Register columns from $json.rca.\n*/\nreturn [{\n  json: {\n    ...$json,\n    action: 'CREATE_RCA',\n    excelStatus: 'PENDING_EXCEL_NODE_CONFIGURATION',\n    createdDate: new Date().toISOString(),\n    lastUpdated: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "17",
+      "name": "17_Create_RCA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3600,
+        0
+      ],
+      "notes": "Replace with Excel 365/OneDrive/SharePoint Add Row node."
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    timestamp: new Date().toISOString(),\n    workflowExecutionId: $execution.id,\n    jiraIssueKey: $json.jira.issueKey,\n    action: $json.action ?? 'UNKNOWN',\n    rcaStatus: $json.rca?.document_control?.rca_status ?? 'Investigation Required',\n    aiStatus: 'Processed',\n    excelStatus: $json.excelStatus ?? 'Unknown',\n    numberOfFieldsUpdated: 0,\n    workflowDurationNote: 'Calculated by n8n execution metadata'\n  }\n}];"
+      },
+      "id": "18",
+      "name": "18_Update_Audit_Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3840,
+        -120
+      ],
+      "notes": "Map this output to the Excel Audit Log sheet."
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json.jira ?? {};\nconst r = $json.rca ?? {};\nreturn [{\n  json: {\n    message: `Production RCA automation completed.\nJira Issue: ${j.issueKey ?? ''}\nSummary: ${j.summary ?? ''}\nRCA Status: ${r.document_control?.rca_status ?? 'Investigation Required'}\nExcel Status: ${$json.excelStatus ?? 'Unknown'}`,\n    jiraIssueKey: j.issueKey ?? '',\n    rcaStatus: r.document_control?.rca_status ?? 'Investigation Required'\n  }\n}];"
+      },
+      "id": "19",
+      "name": "19_Send_Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4080,
+        -120
+      ],
+      "notes": "Replace/add Slack, Teams, Email, or other notification node."
+    }
+  ],
+  "connections": {
+    "01_Jira_Trigger": {
+      "main": [
+        [
+          {
+            "node": "02_Validate_Production_Bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02_Validate_Production_Bug": {
+      "main": [
+        [
+          {
+            "node": "03_Is_Production_Bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03_Is_Production_Bug": {
+      "main": [
+        [
+          {
+            "node": "04_Load_Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "04_Load_Configuration": {
+      "main": [
+        [
+          {
+            "node": "05_Get_Jira_Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05_Get_Jira_Issue": {
+      "main": [
+        [
+          {
+            "node": "06_Get_Jira_Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06_Get_Jira_Comments": {
+      "main": [
+        [
+          {
+            "node": "07_Get_Jira_History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07_Get_Jira_History": {
+      "main": [
+        [
+          {
+            "node": "08_Normalize_Jira_Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08_Normalize_Jira_Data": {
+      "main": [
+        [
+          {
+            "node": "09_Remove_Sensitive_Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09_Remove_Sensitive_Data": {
+      "main": [
+        [
+          {
+            "node": "10_Prepare_AI_RCA_Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10_Prepare_AI_RCA_Prompt": {
+      "main": [
+        [
+          {
+            "node": "11_Validate_AI_JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "11_Validate_AI_JSON": {
+      "main": [
+        [
+          {
+            "node": "12_Apply_RCA_Business_Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "12_Apply_RCA_Business_Rules": {
+      "main": [
+        [
+          {
+            "node": "13_Search_Excel_RCA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "13_Search_Excel_RCA": {
+      "main": [
+        [
+          {
+            "node": "14_Check_Existing_RCA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "14_Check_Existing_RCA": {
+      "main": [
+        [
+          {
+            "node": "15_Existing_RCA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "15_Existing_RCA": {
+      "main": [
+        [
+          {
+            "node": "16_Update_RCA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "17_Create_RCA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "16_Update_RCA": {
+      "main": [
+        [
+          {
+            "node": "18_Update_Audit_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "17_Create_RCA": {
+      "main": [
+        [
+          {
+            "node": "18_Update_Audit_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "18_Update_Audit_Log": {
+      "main": [
+        [
+          {
+            "node": "19_Send_Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "jira-production-rca-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

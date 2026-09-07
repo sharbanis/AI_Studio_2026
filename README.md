@@ -10,7 +10,7 @@ This repository contains AI-assisted testing learning material, prompt engineeri
 - Reusable prompt templates for requirements, PRD, API, security, regression, and validation tasks
 - A Streamlit application that fetches Jira issues and generates test cases with Ollama or Groq
 - A Flask-based Test Plan AI Agent (BLAST protocol) that turns a Jira issue into a full test plan using Groq
-- n8n workflow agents for fetching and creating Jira issues
+- n8n workflow agents for fetching and creating Jira issues, bug triage, and production-defect RCA
 - Selenium automation examples and TestNG framework references
 - VWO login PRD, test case, and test plan practice outputs
 
@@ -55,7 +55,7 @@ Then open `http://localhost:5000` in the browser, enter a Jira issue key, and it
 - `LearningAI/chapter_02_PromptEngg/` - Prompt engineering templates and framework guidance
 - `LearningAI/chapter_03_LocalTestCaseGenerator/` - Streamlit Jira test-case generator
 - `LearningAI/chapter_07_AI_Agents/` - Flask-based Test Plan AI Agent (BLAST protocol)
-- `LearningAI/chapter_08_n8n/` - n8n workflow agents for fetching and creating Jira issues
+- `LearningAI/chapter_08_n8n/` - n8n workflow agents for Jira issue management, bug triage, and production-defect RCA
 - `Prompt_Templates/` - Reusable prompt collections for QA and AI-assisted testing
 - `Task_Projects/01_Project_PrommptEngg_RICEPOT_Selenium/` - Selenium and TestNG automation project under `Output_Result/SeleniumAdvanceFramework/`
 - `Task_Projects/02_Project_PromptEngg/` - VWO login PRD, test plan, and test case outputs
