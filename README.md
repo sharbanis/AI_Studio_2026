@@ -10,7 +10,8 @@ This repository contains AI-assisted testing learning material, prompt engineeri
 - Reusable prompt templates for requirements, PRD, API, security, regression, and validation tasks
 - A Streamlit application that fetches Jira issues and generates test cases with Ollama or Groq
 - A Flask-based Test Plan AI Agent (BLAST protocol) that turns a Jira issue into a full test plan using Groq
-- n8n workflow agents for fetching and creating Jira issues, bug triage, and production-defect RCA
+- n8n workflow agents for fetching and creating Jira issues, bug triage, production-defect RCA, and social media content generation
+- A Langflow visual-flow environment for building LLM-driven agents such as bug triage and test plan generation
 - Selenium automation examples and TestNG framework references
 - VWO login PRD, test case, and test plan practice outputs
 
@@ -49,13 +50,28 @@ python app.py
 
 Then open `http://localhost:5000` in the browser, enter a Jira issue key, and it generates a complete test plan (Happy Path, Negative, Edge Cases, and Regression) using Groq. See `LearningAI/chapter_07_AI_Agents/Summary_Details.md` for the architecture and flow diagram.
 
+### Run Langflow
+
+Langflow is set up under `LearningAI/chapter_09_Langflow/`.
+
+```powershell
+cd LearningAI/chapter_09_Langflow
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install langflow lfx-bundles lfx-openai
+langflow run
+```
+
+Then open `http://localhost:7860` in the browser to build and run visual LLM flows (bug triage, test plan generation, etc.).
+
 ## Project Structure
 
 - `LearningAI/chapter_01_LLMBasics/` - LLM basics and core learning notes
 - `LearningAI/chapter_02_PromptEngg/` - Prompt engineering templates and framework guidance
 - `LearningAI/chapter_03_LocalTestCaseGenerator/` - Streamlit Jira test-case generator
 - `LearningAI/chapter_07_AI_Agents/` - Flask-based Test Plan AI Agent (BLAST protocol)
-- `LearningAI/chapter_08_n8n/` - n8n workflow agents for Jira issue management, bug triage, and production-defect RCA
+- `LearningAI/chapter_08_n8n/` - n8n workflow agents for Jira issue management, bug triage, production-defect RCA, and social media
+- `LearningAI/chapter_09_Langflow/` - Langflow visual flow-builder environment for LLM agents and bug triage
 - `Prompt_Templates/` - Reusable prompt collections for QA and AI-assisted testing
 - `Task_Projects/01_Project_PrommptEngg_RICEPOT_Selenium/` - Selenium and TestNG automation project under `Output_Result/SeleniumAdvanceFramework/`
 - `Task_Projects/02_Project_PromptEngg/` - VWO login PRD, test plan, and test case outputs

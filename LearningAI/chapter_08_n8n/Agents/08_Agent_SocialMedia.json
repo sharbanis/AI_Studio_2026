@@ -1,0 +1,370 @@
+{
+  "name": "08_Agent_SocialMedia",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -768,
+        -496
+      ],
+      "id": "b3fbad2c-66cb-4c2e-849f-11b5a3d30444",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a LinkedIn topic creator. Generate one fresh, specific LinkedIn post topic for AI-in-QA & PMO audience. Avoid generic themes. Return the topic, a one-line angle, hook and the target reader. Keep them practical and non repetitive"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -560,
+        -240
+      ],
+      "id": "77dbf058-a17b-410b-a220-23021b790647",
+      "name": "Content Topic Generator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a LinkedIn Post:\n\nTopic:{{ $json.output.properties.topic.type }}\n\nAngle:{{ $json.output.properties.angle.type }}\n\nAudience: {{ $json.output.properties.audience.type }}\n\nRules: No contradictions, no emojis, plain declarative sentences, short paragraphs, one clear takeaway. use 150-200 words. create a title. create one sentence image prompt describing a clean technical clran illustration for this post\nhook: {{ $json.output.properties.hook }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Write a full LinkedIn post for QA+PMO audience. return only the fields required by the schema.\nGenerate one fresh, specific LinkedIn post topic. Avoid generic themes. Return the topic, a one-line angle, and the target reader. Output only what the schema asks for."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -224,
+        -320
+      ],
+      "id": "d4169399-dd19-4539-b915-82bf4ec72bdc",
+      "name": "Content Creator -LInkedinPost",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -320
+      ],
+      "id": "8c4253eb-5a13-44c0-bdbe-3fb1d3afd556",
+      "name": "Create a post"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.7-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        -16
+      ],
+      "id": "55dbd6af-693a-44f6-ae24-ae6e9e22a5a8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"topic\": { \"type\": \"string\" },\n    \"angle\": { \"type\": \"string\" },\n    \"audience\": { \"type\": \"string\" },\n    \"hook\": { \"type\": \"string\" }\n  },\n  \"required\": [\"topic\", \"angle\", \"audience\", \"hook\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        -32
+      ],
+      "id": "8b6279d8-3446-443b-ac8f-7b7b8e688e22",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -800,
+        -240
+      ],
+      "id": "b9602ab3-6212-4718-add4-ed27cb4d4eaa",
+      "name": "When chat message received",
+      "webhookId": "ef9bf37e-43b9-46d1-8ead-5900e25250a2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "5b64b848-67bb-4b95-8aba-9f8c9b6a5312",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\"type\": \"object\",\n\"properties\": {\n\"post_title\": { \"type\": \"string\" },\n\"post_body\": { \"type\": \"string\" },\n\"hash_tags\": { \"type\": \"string\" },\n\"image_prompt\": { \"type\": \"string\" }\n},\n\"required\": [\"post_title\", \"post_body\", \"hash_tags\", \"image_prompt\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        -64
+      ],
+      "id": "abbbf567-eb58-4abb-815c-1914abd3c310",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/interactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "YOUR_GOOGLE_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gemini-3.1-flash-image\",\n  \"input\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"\"\n    }\n  ]\n} {{ $json.output.image_prompt }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        128,
+        -320
+      ],
+      "id": "7d251746-1ee6-4fc2-8b47-569b40b94f5b",
+      "name": "Google Image Creator"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        -320
+      ],
+      "id": "d1a7e5ad-794f-4427-b5d5-ff7c3fd0917d",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {
+    "Content Topic Generator": [
+      {
+        "json": {
+          "output": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "type": "The 'Synthetic Green' Trap: How AI-Generated Test Cases Mask True Release Risk on PMO Dashboards"
+              },
+              "angle": {
+                "type": "AI test generators inflate velocity metrics and test counts by 300%, but without mutation testing and risk traceability, PMOs are approving releases based on 'hollow green' dashboards."
+              },
+              "audience": {
+                "type": "QA Directors, PMO Delivery Leads, and VP/Heads of Engineering overseeing enterprise AI tool rollouts."
+              },
+              "hook": {
+                "type": "Your PMO dashboard shows QA test creation velocity jumped 300% after adopting GenAI. So why did critical defect escapes to production just hit a 12-month high?"
+              }
+            },
+            "required": [
+              "topic",
+              "angle",
+              "audience",
+              "hook"
+            ]
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Content Creator -LInkedinPost": [
+      {
+        "json": {
+          "output": {
+            "post_title": "The 'Synthetic Green' Trap: AI-Generated Tests Mask Release Risk",
+            "post_body": "AI test generators can inflate velocity and test counts by 300%. Teams are celebrating volume and green dashboards while meaningful fault-detection remains unmeasured.\n\nGenerated tests often exercise simple paths, replicate assertions, and add noise without finding defects. Mutation testing and requirement-to-risk traceability are rarely applied to AI-produced suites.\n\nPMO dashboards that display pass rates and test counts become misleading when they lack measures of test effectiveness. Approval gates tied to those dashboards create the illusion of safe releases.\n\nFixing this requires changing what PMOs and QA track. Make mutation score a gating metric. Require traceability from critical risks to tests. Add representative fault seeding and periodic exploratory audits to validate effectiveness.\n\nStart reporting defect escape metrics and test effectiveness ratios alongside velocity. That restores signal to delivery decisions and prevents hollow green approvals.\n\nTakeaway: Do not accept AI-generated test volume as proof of readiness; insist on mutation testing and risk traceability before approving releases.",
+            "hash_tags": "#QA #PMO #AIinTesting #MutationTesting #ReleaseRisk #EngineeringLeadership",
+            "image_prompt": "A clean technical illustration of a PMO dashboard showing overly green status indicators in the foreground with faint overlays of broken test case icons and mutation symbols behind, using a minimal, professional color palette."
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Content Topic Generator": {
+      "main": [
+        [
+          {
+            "node": "Content Creator -LInkedinPost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Creator -LInkedinPost": {
+      "main": [
+        [
+          {
+            "node": "Google Image Creator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Topic Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Content Topic Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Content Topic Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creator -LInkedinPost",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Content Creator -LInkedinPost",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Image Creator": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ee1d1d0e-db14-480f-962d-d554e85c98bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e6175cb2f322ce0df82cc6f41ccca14f91ae4947553f482b4bfdb7345ad6349"
+  },
+  "nodeGroups": [],
+  "id": "htcye1UI2Rx5DYKv",
+  "tags": []
+}
