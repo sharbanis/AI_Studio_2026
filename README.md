@@ -11,7 +11,7 @@ This repository contains AI-assisted testing learning material, prompt engineeri
 - A Streamlit application that fetches Jira issues and generates test cases with Ollama or Groq
 - A Flask-based Test Plan AI Agent (BLAST protocol) that turns a Jira issue into a full test plan using Groq
 - n8n workflow agents for fetching and creating Jira issues, bug triage, production-defect RCA, and social media content generation
-- A Langflow visual-flow environment for building LLM-driven agents such as bug triage and test plan generation
+- Langflow agents for bug triage (dynamic Jira fetch) and flaky test-case identification, with a React chat UI
 - Selenium automation examples and TestNG framework references
 - VWO login PRD, test case, and test plan practice outputs
 
@@ -64,6 +64,18 @@ langflow run
 
 Then open `http://localhost:7860` in the browser to build and run visual LLM flows (bug triage, test plan generation, etc.).
 
+### Run the Langflow Chat UI
+
+A lightweight React frontend for the Bug Triage agent is in `LearningAI/chapter_09_Langflow/langflow-chat-ui/`.
+
+```powershell
+cd LearningAI/chapter_09_Langflow/langflow-chat-ui
+npm install --include=dev
+npm run dev
+```
+
+Then open `http://localhost:5173`. Set the Langflow API key via `VITE_LANGFLOW_API_KEY` (e.g. in a local `.env` file) before running.
+
 ## Project Structure
 
 - `LearningAI/chapter_01_LLMBasics/` - LLM basics and core learning notes
@@ -71,7 +83,7 @@ Then open `http://localhost:7860` in the browser to build and run visual LLM flo
 - `LearningAI/chapter_03_LocalTestCaseGenerator/` - Streamlit Jira test-case generator
 - `LearningAI/chapter_07_AI_Agents/` - Flask-based Test Plan AI Agent (BLAST protocol)
 - `LearningAI/chapter_08_n8n/` - n8n workflow agents for Jira issue management, bug triage, production-defect RCA, and social media
-- `LearningAI/chapter_09_Langflow/` - Langflow visual flow-builder environment for LLM agents and bug triage
+- `LearningAI/chapter_09_Langflow/` - Langflow visual-flow agents (bug triage, flaky test-case identification) and a React chat UI
 - `Prompt_Templates/` - Reusable prompt collections for QA and AI-assisted testing
 - `Task_Projects/01_Project_PrommptEngg_RICEPOT_Selenium/` - Selenium and TestNG automation project under `Output_Result/SeleniumAdvanceFramework/`
 - `Task_Projects/02_Project_PromptEngg/` - VWO login PRD, test plan, and test case outputs

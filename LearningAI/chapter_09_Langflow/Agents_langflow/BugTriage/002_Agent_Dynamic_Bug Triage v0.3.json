@@ -1359,7 +1359,7 @@
                 "value": [
                   {
                     "key": "Authorization",
-                    "value": "Basic c2hhcmJhbmljYXBAZ21haWwuY29tOkFUQVRUM3hGZkdGMDV1REk4ZzdMaS1tZ2tvRFlZQVdORk1UVDdjVE5MR3BfQUR0UEpjUGgzcU5QbFM4Sy0xMDh0UGx0V3hSZnM2cTIxTDB2aVJSRDBGMUt6SlpVS1VpaXF1djFkZHp0V3hqWlowVG9neFJsd3g4RmdEZG5tZlFIdmc1azNLalF5SzBpalBEVmNaSm5VVG1FMVZURnlERkJuUl9IQnhFbGZXQi1RQVJ3THhTYV9qYz0zMzhGRUNFRA=="
+                    "value": "YOUR_JIRA_BASIC_AUTH"
                   },
                   {
                     "key": "Accept",
